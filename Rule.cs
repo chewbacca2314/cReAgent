@@ -31,7 +31,7 @@ public class Rule
     private static readonly Vector4 ExceptionColor = new(255, 0, 0, 255);
 
     private static readonly ParsingConfig ParsingConfig = new ParsingConfig()
-        { AllowNewToEvaluateAnyType = true, ResolveTypesBySimpleName = true, CustomTypeProvider = new CustomDynamicLinqCustomTypeProvider() };
+    { AllowNewToEvaluateAnyType = true, ResolveTypesBySimpleName = true, CustomTypeProvider = new CustomDynamicLinqCustomTypeProvider() };
 
     static Rule()
     {
@@ -107,6 +107,7 @@ public class Rule
                     case RuleActionType.Key:
                         KeyV2 = new HotkeyNodeValue(Keys.D0);
                         break;
+
                     case RuleActionType.SingleSideEffect:
                     case RuleActionType.MultipleSideEffects:
                         KeyV2 = null;
@@ -215,32 +216,32 @@ public class Rule
             switch (Type)
             {
                 case RuleActionType.Key:
-                {
-                    var expression = DynamicExpressionParser.ParseLambda<RuleState, bool>(
-                        ParsingConfig,
-                        false,
-                        RuleSource);
-                    var boolFunc = expression.Compile();
-                    return (s => boolFunc(s) ? [new PressKeySideEffect(KeyV2 ?? throw new Exception("Key is not assigned"))] : [], null);
-                }
+                    {
+                        var expression = DynamicExpressionParser.ParseLambda<RuleState, bool>(
+                            ParsingConfig,
+                            false,
+                            RuleSource);
+                        var boolFunc = expression.Compile();
+                        return (s => boolFunc(s) ? [new PressKeySideEffect(KeyV2 ?? throw new Exception("Key is not assigned"))] : [], null);
+                    }
                 case RuleActionType.SingleSideEffect:
-                {
-                    var expression = DynamicExpressionParser.ParseLambda<RuleState, ISideEffect>(
-                        ParsingConfig,
-                        false,
-                        RuleSource);
-                    var effectFunc = expression.Compile();
-                    return (s => effectFunc(s) switch { { } sideEffect => [sideEffect], _ => Enumerable.Empty<ISideEffect>() }, null);
-                }
+                    {
+                        var expression = DynamicExpressionParser.ParseLambda<RuleState, ISideEffect>(
+                            ParsingConfig,
+                            false,
+                            RuleSource);
+                        var effectFunc = expression.Compile();
+                        return (s => effectFunc(s) switch { { } sideEffect => [sideEffect], _ => Enumerable.Empty<ISideEffect>() }, null);
+                    }
                 case RuleActionType.MultipleSideEffects:
-                {
-                    var expression = DynamicExpressionParser.ParseLambda<RuleState, IEnumerable<ISideEffect>>(
-                        ParsingConfig,
-                        false,
-                        RuleSource);
-                    var effectFunc = expression.Compile();
-                    return (s => effectFunc(s) switch { { } sideEffects => sideEffects, _ => Enumerable.Empty<ISideEffect>() }, null);
-                }
+                    {
+                        var expression = DynamicExpressionParser.ParseLambda<RuleState, IEnumerable<ISideEffect>>(
+                            ParsingConfig,
+                            false,
+                            RuleSource);
+                        var effectFunc = expression.Compile();
+                        return (s => effectFunc(s) switch { { } sideEffects => sideEffects, _ => Enumerable.Empty<ISideEffect>() }, null);
+                    }
                 default:
                     throw new Exception($"Invalid condition type: {Type}");
             }
@@ -253,7 +254,6 @@ public class Rule
 
     private delegate T ScriptFunc<T>(RuleState State);
 
-
     private (Func<RuleState, IEnumerable<ISideEffect>> Func, string LastException) RebuildFunctionV2()
     {
         try
@@ -261,23 +261,23 @@ public class Rule
             switch (Type)
             {
                 case RuleActionType.Key:
-                {
-                    var @delegate = DelegateCompiler.CompileDelegate<ScriptFunc<bool>>(RuleSource, ScriptOptions, CreateAlc());
-                    return (s => @delegate(s)
-                        ? [new PressKeySideEffect(KeyV2 ?? throw new Exception("Key is not assigned"))]
-                        : [], null);
-                }
+                    {
+                        var @delegate = DelegateCompiler.CompileDelegate<ScriptFunc<bool>>(RuleSource, ScriptOptions, CreateAlc());
+                        return (s => @delegate(s)
+                            ? [new PressKeySideEffect(KeyV2 ?? throw new Exception("Key is not assigned"))]
+                            : [], null);
+                    }
                 case RuleActionType.SingleSideEffect:
-                {
-                    var @delegate = DelegateCompiler.CompileDelegate<ScriptFunc<ISideEffect>>(RuleSource, ScriptOptions, CreateAlc());
-                    return (s => @delegate(s) switch { { } sideEffect => [sideEffect], _ => Enumerable.Empty<ISideEffect>() },
-                        null);
-                }
+                    {
+                        var @delegate = DelegateCompiler.CompileDelegate<ScriptFunc<ISideEffect>>(RuleSource, ScriptOptions, CreateAlc());
+                        return (s => @delegate(s) switch { { } sideEffect => [sideEffect], _ => Enumerable.Empty<ISideEffect>() },
+                            null);
+                    }
                 case RuleActionType.MultipleSideEffects:
-                {
-                    var @delegate = DelegateCompiler.CompileDelegate<ScriptFunc<IEnumerable<ISideEffect>>>(RuleSource, ScriptOptions, CreateAlc());
-                    return (s => @delegate(s) switch { { } sideEffects => sideEffects, _ => Enumerable.Empty<ISideEffect>() }, null);
-                }
+                    {
+                        var @delegate = DelegateCompiler.CompileDelegate<ScriptFunc<IEnumerable<ISideEffect>>>(RuleSource, ScriptOptions, CreateAlc());
+                        return (s => @delegate(s) switch { { } sideEffects => sideEffects, _ => Enumerable.Empty<ISideEffect>() }, null);
+                    }
                 default:
                     throw new Exception($"Invalid condition type: {Type}");
             }

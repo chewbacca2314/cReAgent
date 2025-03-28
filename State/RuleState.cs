@@ -241,4 +241,6 @@ public class RuleState
 
     [Api]
     public bool IsAnyLargePanelOpen => _internalState.LargePanelVisible;
+
+    public float GetRandomNumber(float min, float max) => (float)(Random.Shared.NextDouble() * (max - min) + min);
 }

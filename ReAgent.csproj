@@ -9,7 +9,26 @@
     <DebugType>embedded</DebugType>
     <PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
     <EmbedAllSources>true</EmbedAllSources>
+	<CopyToPlugins>True</CopyToPlugins>
   </PropertyGroup>
+
+	<Target Name="CopyToPluginsFolder" AfterTargets="Build" Condition="'$(CopyToPlugins)' == 'True'" Label="Copy dll to plugins folder">
+		<!-- Define the source and destination paths -->
+		<PropertyGroup>
+			<!-- $(TargetFileName) will use the output dll name -->
+			<SourcePath>$(OutputPath)$(TargetFileName)</SourcePath>
+			<!-- Set destination path to your dpb\Plugins\<YourProjectName> directory -->
+			<DestinationPath>$(exileCore2Package)\Plugins\Compiled\$(ProjectName)</DestinationPath>
+		</PropertyGroup>
+
+		<!-- Create the destination folder if it doesn't exist -->
+		<MakeDir Directories="$(DestinationPath)" />
+
+		<!-- Copy the output DLL to the target Plugins folder -->
+		<Copy SourceFiles="$(SourcePath)" DestinationFolder="$(DestinationPath)" />
+		<!-- Copy the PDB file to the target Plugins folder -->
+	</Target>	
+	
   <ItemGroup>
     <Compile Remove="docs\**" />
     <EmbeddedResource Remove="docs\**" />
